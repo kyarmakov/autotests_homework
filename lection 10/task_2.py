@@ -15,3 +15,25 @@ def all_division(*arg1):
     for i in arg1[1:]:
         division /= i
     return division
+
+@pytest.mark.smoke
+def test_divide_ints():
+    assert 2.5 == all_division(5, 2)
+
+
+@pytest.mark.smoke
+def test_divide_floats():
+    assert 1.2 == all_division(2.4, 2.0)
+
+@pytest.mark.smoke
+def test_divide_by_zero():
+    with pytest.raises(ZeroDivisionError):
+        all_division(3, 0)
+
+
+def test_divide_negative():
+    assert -2.5 == all_division(5, -2)
+
+
+def test_divide_negatives():
+    assert 2.5 == all_division(-5, -2)
