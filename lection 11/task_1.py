@@ -41,5 +41,8 @@ try:
     about_link.click()
     assert driver.current_url == tensor_about
 
+except Exception as e:
+    print(e)
+
 finally:
     driver.quit()

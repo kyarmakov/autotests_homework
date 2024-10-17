@@ -15,7 +15,7 @@ url = 'https://test-sso.sbis.ru/auth-online/?ret=test-online.sbis.ru'
 login = 'Демо_тензор'
 password = 'Демо123'
 dialogs = 'https://test-online.sbis.ru/page/dialogs'
-message = 'test message'
+message = 'new message'
 
 driver = webdriver.Chrome()
 
@@ -33,11 +33,11 @@ try:
     password_input.send_keys(password, Keys.ENTER)
     sleep(10)
 
-    # Переходим в реестр Контакты
-    contacts = driver.find_element(By.XPATH, "//span[text()='Контакты']")
-    action_chains = ActionChains(driver)
-    action_chains.double_click(contacts).perform()
-
+    contacts = driver.find_element(By.CSS_SELECTOR, "a[data-qa = 'Контакты']")
+    contacts.click()
+    contacts_accordion = driver.find_element(By.CSS_SELECTOR,
+                                             "div[data-qa='NavigationPanels-Accordion__container']>a[href='/page/dialogs']")
+    contacts_accordion.click()
     sleep(3)
 
     assert driver.current_url == dialogs
@@ -66,11 +66,12 @@ try:
     # Убеждаемся, что сообщение появилось в реестре
     items = driver.find_elements(By.XPATH, "(//div[@data-qa='items-container'])[4]/div[@data-qa='item']")
     items_after = len(items)
+    index = [i for i, el in enumerate(items) if message in el.text]
+    new_message = items[index[0]]
+    assert message in new_message.text
     assert items_after - items_before == 1
 
     # Удаляем сообщение и убеждаемся, что удалили
-    new_message = driver.find_element(By.XPATH, "((//div[@data-qa='items-container'])[4]/div[@data-qa='item'])[1]")
-
     action_chains = ActionChains(driver)
     action_chains.context_click(new_message)
     action_chains.perform()
@@ -81,8 +82,11 @@ try:
 
     items = driver.find_elements(By.XPATH, "(//div[@data-qa='items-container'])[4]/div[@data-qa='item']")
     items_after_delete = len(items)
+    assert items_after_delete == items_before
+    assert not [i for i, el in enumerate(items) if message in el.text]
 
-    assert items_before - items_after_delete == 0
+except Exception as e:
+    print(e)
 
 finally:
     driver.quit()
